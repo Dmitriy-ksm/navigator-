@@ -1,0 +1,156 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace NavigationDLL
+{
+    public class GrafNode
+    {
+        public char flag;// Если flag = 'f' - вершину нашли со старта, если flag = 's' - вершину нашли с конца
+        public long index;// Индекс вершины
+        public double cost_h;// Евристика вершины
+        public long[] broth_node;// Индексы смежных вершин
+        public int count_nodes;//Кол-во смежных вершин
+        public double[] broth_node_range;// Растояние от данной вершины до смежных
+        public double[] broth_node_range_way_passed;// F(x) смежных вершин
+        public double[] broth_cost_h;// G(x) смежных вершин
+        public GrafNodeParam parametrs;
+        /// <summary>
+        /// Конструктор для создания вершины
+        /// </summary>
+        /// <param name="data">Строка данных</param>
+        /// <param name="data_separator">Разделитель данных</param>
+        /// <param name="massive_element_separator">Разделитель элементов в массиве</param>
+        public GrafNode(string data, char data_separator = '/', char massive_element_separator = ';')
+        {
+            string[] pars_data = data.Split(data_separator);
+            index = Convert.ToInt64(pars_data[0]);
+            string[] nodes = pars_data[1].Split(massive_element_separator);
+            count_nodes = nodes.Length;
+            broth_node = new long[count_nodes];
+            broth_node_range = new double[count_nodes];
+            broth_node_range_way_passed = new double[count_nodes];
+            broth_cost_h = new double[count_nodes];
+            for (int i = 0; i < count_nodes; i++)
+            {
+                broth_node[i] = Convert.ToInt64(nodes[i]);
+            }
+            if (pars_data.Length > 2)
+            {
+                string[] nodes_distans = pars_data[2].Split(massive_element_separator);
+                for (int i = 0; i < count_nodes; i++)
+                {
+                    broth_node_range[i] = Convert.ToDouble(nodes_distans[i]);
+                }
+            }
+            string[] pars_params = pars_data[pars_data.Length - 1].Split(massive_element_separator);
+            parametrs = new GrafNodeParam(Convert.ToDouble(pars_params[0]), Convert.ToDouble(pars_params[1]), Convert.ToDouble(pars_params[2]));
+        }
+        /// <summary>
+        /// Конструктор для создания вершины графа
+        /// </summary>
+        /// <param name="node_ind">Индекс вершины</param>
+        /// <param name="node_br">Массив смежных вершин</param>
+        /// <param name="node_br_range">Массив растояния до смежных вершин</param>
+        /// <param name="param">Координаты и доп. параметры вершины</param>
+        public GrafNode(long node_ind, long[] node_br, double[] node_br_range, GrafNodeParam param)
+        {
+            index = node_ind;
+            count_nodes = node_br.Length;
+            broth_node = new long[count_nodes];
+            broth_node_range = new double[count_nodes];
+            broth_node_range_way_passed = new double[count_nodes];
+            broth_cost_h = new double[count_nodes];
+            for (int i = 0; i < count_nodes; i++)
+            {
+                broth_node[i] = node_br[i];
+                broth_node_range[i] = node_br_range[i];
+            }
+            parametrs.sin_coord_Latitude_radian = param.sin_coord_Latitude_radian;
+            parametrs.cos_coord_Latitude_radian = param.cos_coord_Latitude_radian;
+            parametrs.coord_Longitude_radian = param.coord_Longitude_radian;
+            parametrs.koef = param.koef;
+        }
+        /// <summary>
+        /// Расчет растояния между данной и точкой назначения 
+        /// </summary>
+        /// <param name="dest_node">Координаты назначения</param>
+        /// <returns>Возвращает длину в метрах</returns>
+        public double calculationCost(GrafNodeParam dest_node)
+        {
+            double return_value;
+            double sin_delt_Longitude = Math.Sin(dest_node.coord_Longitude_radian - parametrs.coord_Longitude_radian);
+            double cos_delt_Longitude = Math.Cos(dest_node.coord_Longitude_radian - parametrs.coord_Longitude_radian);
+            double y = Math.Sqrt(Math.Pow(dest_node.cos_coord_Latitude_radian * sin_delt_Longitude, 2) + Math.Pow(parametrs.cos_coord_Latitude_radian * dest_node.sin_coord_Latitude_radian - parametrs.sin_coord_Latitude_radian * dest_node.cos_coord_Latitude_radian * cos_delt_Longitude, 2));
+            double x = parametrs.sin_coord_Latitude_radian * dest_node.sin_coord_Latitude_radian + parametrs.cos_coord_Latitude_radian * dest_node.cos_coord_Latitude_radian * cos_delt_Longitude;
+            return_value = Math.Atan2(y, x) * 6372795;
+            return return_value;
+        }
+        /// <summary>
+        /// Пересчет F(x) для смежных вершин 
+        /// </summary>
+        /// <param name="wayPassed">Пройденное растояние до данной вершины </param>
+        public void calculatedPassedWay(double wayPassed)
+        {
+            for (int i = 0; i < count_nodes; i++)
+            {
+                broth_node_range_way_passed[i] = wayPassed + broth_node_range[i];
+            }
+        }
+        /// <summary>
+        /// Получает позицию в массиве смежной для данной вершины
+        /// </summary>
+        /// <param name="index">Индекс смежной вершины</param>
+        /// <returns>Позиция в массиве СВ данной вершины</returns>
+        public int getBrothIndx(long index)
+        {
+            for (int i = 0; i < count_nodes; i++)
+            {
+                if (broth_node[i] == index)
+                    return i;
+            }
+            return -1;
+        }
+        public void ClearNode()
+        {
+            broth_node_range_way_passed = new double[broth_node.Length];
+            broth_cost_h = new double[broth_node.Length];
+            flag = 't';
+        }
+    }
+
+
+    public struct Coords
+    {
+        public double latitude;
+        public double longitude;
+        public Coords(double latitude, double longitude)
+        {
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+    }
+
+    public struct GrafNodeParam
+    {
+        public Coords coords;
+        public double sin_coord_Latitude_radian; //Синус долготы
+        public double cos_coord_Latitude_radian; //Косинус долготы
+        public double coord_Longitude_radian;// Широта
+        public double koef;// Доп. параметры
+        /// <summary>
+        /// Установка вершин
+        /// </summary>
+        /// <param name="latitude">Долгота(градусы)</param>
+        /// <param name="longitude">Широта(градусы)</param>
+        /// <param name="koef">Доп. Параметр</param>
+        public GrafNodeParam(double latitude, double longitude, double koef)
+        {
+            coords = new Coords(latitude, longitude);
+            sin_coord_Latitude_radian = Math.Sin(latitude * Math.PI / 180);
+            cos_coord_Latitude_radian = Math.Cos(latitude * Math.PI / 180);
+            coord_Longitude_radian = longitude * Math.PI / 180;
+            this.koef = koef;
+        }
+    }
+}
