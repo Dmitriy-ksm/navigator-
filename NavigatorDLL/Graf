@@ -1,0 +1,283 @@
+using System;
+using System.Linq;
+using System.Collections.Generic;
+
+namespace NavigationDLL
+{
+    public class Graf
+    {
+        public string tree_file;
+        public bool blocker;
+        public bool block_suc;
+        public bool reverse_A_breaker;
+        private long index_intersection;
+        public Dictionary<long, GrafNode> tree = new Dictionary<long, GrafNode>();
+        /// <summary>
+        /// Конструктор графа
+        /// </summary>
+        /// <param name="data">Данные</param>
+        /// <param name="node_separator">Разделитель по вершинам</param>
+        /// <param name="data_separator">Разделитель по данным вершин</param>
+        /// <param name="massive_element_separator">Разделитель колекций в данных для вершины</param>
+        public Graf(string data, char node_separator = '!', char data_separator = '/', char massive_element_separator = ';')
+        {
+            reverse_A_breaker = false;
+            blocker = false;
+            block_suc = false;
+            index_intersection = -1;
+            string[] pars_data = data.Split(node_separator);
+            for (int i = 0; i < pars_data.Length; i++)
+            {
+                GrafNode new_node = new GrafNode(pars_data[i], data_separator, massive_element_separator);
+                tree.Add(new_node.index, new_node);
+            }
+        }
+        public void Refresh_Search()
+        {
+            reverse_A_breaker = false;
+            blocker = false;
+            block_suc = false;
+            index_intersection = -1;
+            foreach (var item in tree)
+            {
+                item.Value.flag = ' ';
+            }
+        }
+        public GrafNode this[long index]
+        {
+            get
+            {
+                return tree[index];
+            }
+        }
+        /// <summary>
+        /// Получение ссылки на смежную вершину для данной
+        /// </summary>
+        /// <param name="index">Индекс данной вершины</param>
+        /// <param name="broth_ind">Позиция в массиве индексов смежных вершин</param>
+        /// <returns>Смежная вершинна</returns>
+        public GrafNode BrothNode(long index, int broth_ind)
+        {
+            return tree[tree[index].broth_node[broth_ind]];
+        }
+        /// <summary>
+        /// Проверяет есть ли вершина в графе
+        /// </summary>
+        /// <param name="index">Индекс вершины</param>
+        /// <returns>Если вершина включенная в граф - true</returns>
+        public bool HasNode(long index)
+        {
+            if (tree[index] != null)
+                return true;
+            return false;
+        }
+        /// <summary>
+        /// Добавление вершины в граф
+        /// </summary>
+        /// <param name="newNode">Новая вершина</param>
+        public void AddNode(GrafNode newNode)
+        {
+            tree.Add(newNode.index, newNode);
+        }
+        /// <summary>
+        /// Расчет данных смежных вершин для данной
+        /// </summary>
+        /// <param name="index">Индекс данной вершины</param>
+        /// <param name="end">Индекс вершины куда в итоге нужно проложить путь</param>
+        /// <param name="passWay">Количество пройденого пути к данной вершине</param>
+        private void SetCost(long index, long end, double passWay)
+        {
+            for (int i = 0; i < tree[index].count_nodes; i++)
+            {
+                long br_ind = tree[index].broth_node[i];
+                tree[br_ind].cost_h = tree[br_ind].calculationCost(tree[end].parametrs);
+                tree[index].broth_cost_h[i] = tree[br_ind].cost_h;
+            }
+            tree[index].calculatedPassedWay(passWay);
+        }
+        /// <summary>
+        /// Дополняем колекцию доступных узлов
+        /// </summary>
+        /// <param name="out_data">Выходная колекция</param>
+        /// <param name="index">Текущая вершина</param>
+        /// <param name="root_index">Вершина из которой пришли</param>
+        private void AddOutData(ref List<SavedData> out_data, long index, long root_index, ref Dictionary<long, double> check_data)
+        {
+            for (int i = 0; i < tree[index].count_nodes; i++)
+            {
+                if (tree[index].broth_node[i] != root_index)
+                {
+                    if (check_data.Count > 0)
+                    {
+                        if (!check_data.ContainsKey(tree[index].broth_node[i]))
+                        {
+                            out_data.Add(new SavedData(index, tree[index].broth_node[i], tree[index].broth_node_range_way_passed[i] + tree[index].broth_cost_h[i], tree[index].broth_node_range_way_passed[i]));
+                            check_data.Add(tree[index].broth_node[i], tree[index].broth_node_range_way_passed[i]);
+                        }
+                        else
+                        {
+                            if (check_data[tree[index].broth_node[i]] > tree[index].broth_node_range_way_passed[i])
+                            {
+                                out_data.Add(new SavedData(index, tree[index].broth_node[i], tree[index].broth_node_range_way_passed[i] + tree[index].broth_cost_h[i], tree[index].broth_node_range_way_passed[i]));
+                                check_data[tree[index].broth_node[i]] = tree[index].broth_node_range_way_passed[i];
+                            }
+                        }
+                    }
+                    else
+                    {
+                        out_data.Add(new SavedData(index, tree[index].broth_node[i], tree[index].broth_node_range_way_passed[i] + tree[index].broth_cost_h[i], tree[index].broth_node_range_way_passed[i]));
+                        check_data.Add(tree[index].broth_node[i], tree[index].broth_node_range_way_passed[i]);
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Минимальный F(x) из колекции вершин
+        /// </summary>
+        /// <param name="array">Колекция вершин</param>
+        /// <returns>Следующий узел для выбора</returns>
+        private static SavedData GetMin(List<SavedData> array)
+        {
+            SavedData return_value = new SavedData();
+            double min = 40076001;
+            foreach (var item in array)
+            {
+                if (item.cost < min)
+                {
+                    min = item.cost;
+                    return_value = item;
+                }
+            }
+            return return_value;
+        }
+        /// <summary>
+        /// Рекурсивная функция для получения пути
+        /// </summary>
+        /// <param name="array">Колекция просмотренных вершин</param>
+        /// <param name="prev_ind">Вершина к которой нужно проложить путь</param>
+        /// <param name="way">Колекция с индексами вершин, которые будут проидены</param>
+        private static void getNextIndex_A(List<SavedData> array, long prev_ind, ref List<long> way)
+        {
+            long temp_ind = -1;
+            double min = 40076001;
+            foreach (var item in array)
+                if (item.index == prev_ind && item.real_cost < min)
+                {
+                    if (!way.Contains(item.index_root))
+                    {
+                        min = item.real_cost;
+                        temp_ind = item.index_root;
+                    }
+                }
+            if (temp_ind != -1)
+            {
+                way.Add(temp_ind);
+                getNextIndex_A(array, way.Last(), ref way);
+            }
+        }
+        /// <summary>
+        /// Нахождение пути по алгоритму А*
+        /// </summary>
+        /// <param name="tree">Граф</param>
+        /// <param name="start">Начальная вершина</param>
+        /// <param name="end">Конечная вершина</param>
+        /// <param name="distans">Пройденный путь</param>
+        /// <returns>Колекция вершин, что нужно пройти</returns>
+        public List<long> getWay_A(long start, long end, out double distans, ref List<SavedData> Not_Look, ref List<SavedData> Look, bool reverse = false)
+        {
+            List<long> way = new List<long>();
+            char new_flag = 'f';
+            char other_flag = 's';
+            if (reverse)
+            {
+                new_flag = 's';
+                other_flag = 'f';
+            }
+            Not_Look = new List<SavedData>();
+            Look = new List<SavedData>();
+            Dictionary<long, double> check = new Dictionary<long, double>();
+            SetCost(start, end, 0);
+            AddOutData(ref Not_Look, start, -1, ref check);
+            SavedData temp = GetMin(Not_Look);
+            SetCost(temp.index, end, temp.real_cost);
+            distans = 0;
+            Look.Add(temp);
+            Not_Look.Remove(temp);
+            while (Look.Last().index != end)
+            {
+                if (reverse_A_breaker)
+                {
+                    return way;
+                }
+                if (!blocker)
+                {
+                    if (index_intersection == -1)
+                    {
+                        AddOutData(ref Not_Look, Look.Last().index, Look.Last().index_root, ref check);
+                        if (Not_Look.Count == 0)
+                        {
+                            reverse_A_breaker = true;
+                            return way;
+                        }
+                        temp = GetMin(Not_Look);
+                        if (tree[temp.index].flag == other_flag)
+                        {
+                            index_intersection = temp.index;
+                            Look.Add(temp);
+                            Not_Look.Remove(temp);
+                            distans = tree[temp.index].broth_node_range[tree[temp.index].getBrothIndx(temp.index_root)];
+                            break;
+                        }
+                        SetCost(temp.index, end, temp.real_cost);
+                        tree[temp.index].flag = new_flag;
+                        Look.Add(temp);
+                        Not_Look.Remove(temp);
+                    }
+                    else
+                        break;
+                }
+                else
+                    block_suc = true;
+            }
+            if (index_intersection == -1)
+            {
+                reverse_A_breaker = true;
+                way.Add(end);
+            }
+            else
+                way.Add(index_intersection);
+            getNextIndex_A(Look, way.Last(), ref way);
+            distans += tree[way[1]].broth_node_range_way_passed[tree[way[1]].getBrothIndx(way[0])];
+            way.Reverse();
+            return way;
+        }
+    }
+
+    public struct SavedData : IComparable<SavedData>
+    {
+        public long index_root;//Вершина из которой пришли
+        public long index;//Текущая вершина
+        public double cost;//F(x)
+        public double real_cost;//f(x)
+        public SavedData(long ind_root, long ind, double c, double r_c)
+        {
+            index_root = ind_root;
+            index = ind;
+            cost = c;
+            real_cost = r_c;
+        }
+        public override string ToString()
+        {
+            return "Из вершины " + index_root + " в вершину " + index + " " + cost + " m";
+        }
+        public int CompareTo(SavedData obj)
+        {
+            if (this.cost > obj.cost)
+                return 1;
+            if (this.cost < obj.cost)
+                return -1;
+            else
+                return 0;
+        }
+    }
+}
