@@ -22,5 +22,6 @@ namespace Navigator
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("ru-UA");
             Application.Run(new Form1());
         }
+
     }
 }
