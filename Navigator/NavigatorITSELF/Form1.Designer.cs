@@ -48,13 +48,12 @@
             this.button_form_save_pts = new System.Windows.Forms.Button();
             this.button_create_ptsfile = new System.Windows.Forms.Button();
             this.saveFileDialog_PTS = new System.Windows.Forms.SaveFileDialog();
-            this.button_ALT_Search = new System.Windows.Forms.Button();
-            this.button_alt_load = new System.Windows.Forms.Button();
             this.backgroundWorker3 = new System.ComponentModel.BackgroundWorker();
             this.PTSSearch = new System.Windows.Forms.Button();
             this.PTSLoad = new System.Windows.Forms.Button();
             this.LandmarkFlag = new System.Windows.Forms.Button();
             this.Exit = new System.Windows.Forms.Button();
+            this.button_pts_cost_set = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_navmap)).BeginInit();
             this.SuspendLayout();
             // 
@@ -72,7 +71,7 @@
             // 
             // textBox_info
             // 
-            this.textBox_info.Location = new System.Drawing.Point(13, 270);
+            this.textBox_info.Location = new System.Drawing.Point(13, 239);
             this.textBox_info.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_info.Multiline = true;
             this.textBox_info.Name = "textBox_info";
@@ -111,7 +110,7 @@
             // button_prev_map
             // 
             this.button_prev_map.Enabled = false;
-            this.button_prev_map.Location = new System.Drawing.Point(16, 50);
+            this.button_prev_map.Location = new System.Drawing.Point(16, 51);
             this.button_prev_map.Margin = new System.Windows.Forms.Padding(4);
             this.button_prev_map.Name = "button_prev_map";
             this.button_prev_map.Size = new System.Drawing.Size(109, 66);
@@ -123,7 +122,7 @@
             // button_next_map
             // 
             this.button_next_map.Enabled = false;
-            this.button_next_map.Location = new System.Drawing.Point(155, 50);
+            this.button_next_map.Location = new System.Drawing.Point(153, 50);
             this.button_next_map.Margin = new System.Windows.Forms.Padding(4);
             this.button_next_map.Name = "button_next_map";
             this.button_next_map.Size = new System.Drawing.Size(117, 66);
@@ -147,7 +146,7 @@
             // button_last_point
             // 
             this.button_last_point.Enabled = false;
-            this.button_last_point.Location = new System.Drawing.Point(155, 124);
+            this.button_last_point.Location = new System.Drawing.Point(153, 124);
             this.button_last_point.Margin = new System.Windows.Forms.Padding(4);
             this.button_last_point.Name = "button_last_point";
             this.button_last_point.Size = new System.Drawing.Size(117, 28);
@@ -170,7 +169,7 @@
             // button_stop_search
             // 
             this.button_stop_search.Enabled = false;
-            this.button_stop_search.Location = new System.Drawing.Point(155, 196);
+            this.button_stop_search.Location = new System.Drawing.Point(153, 196);
             this.button_stop_search.Margin = new System.Windows.Forms.Padding(4);
             this.button_stop_search.Name = "button_stop_search";
             this.button_stop_search.Size = new System.Drawing.Size(117, 28);
@@ -182,7 +181,7 @@
             // button_update_status_search
             // 
             this.button_update_status_search.Enabled = false;
-            this.button_update_status_search.Location = new System.Drawing.Point(155, 160);
+            this.button_update_status_search.Location = new System.Drawing.Point(153, 160);
             this.button_update_status_search.Margin = new System.Windows.Forms.Padding(4);
             this.button_update_status_search.Name = "button_update_status_search";
             this.button_update_status_search.Size = new System.Drawing.Size(117, 28);
@@ -193,10 +192,10 @@
             // 
             // button_pts_add
             // 
-            this.button_pts_add.Location = new System.Drawing.Point(16, 395);
+            this.button_pts_add.Location = new System.Drawing.Point(16, 445);
             this.button_pts_add.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_pts_add.Name = "button_pts_add";
-            this.button_pts_add.Size = new System.Drawing.Size(99, 23);
+            this.button_pts_add.Size = new System.Drawing.Size(109, 23);
             this.button_pts_add.TabIndex = 101;
             this.button_pts_add.Text = "Add PTS";
             this.button_pts_add.UseVisualStyleBackColor = true;
@@ -204,10 +203,10 @@
             // 
             // button_save_pts
             // 
-            this.button_save_pts.Location = new System.Drawing.Point(15, 423);
+            this.button_save_pts.Location = new System.Drawing.Point(16, 481);
             this.button_save_pts.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_save_pts.Name = "button_save_pts";
-            this.button_save_pts.Size = new System.Drawing.Size(100, 53);
+            this.button_save_pts.Size = new System.Drawing.Size(109, 53);
             this.button_save_pts.TabIndex = 102;
             this.button_save_pts.Text = "Finish adding";
             this.button_save_pts.UseVisualStyleBackColor = true;
@@ -215,10 +214,10 @@
             // 
             // button_form_save_pts
             // 
-            this.button_form_save_pts.Location = new System.Drawing.Point(155, 395);
+            this.button_form_save_pts.Location = new System.Drawing.Point(153, 445);
             this.button_form_save_pts.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_form_save_pts.Name = "button_form_save_pts";
-            this.button_form_save_pts.Size = new System.Drawing.Size(116, 23);
+            this.button_form_save_pts.Size = new System.Drawing.Size(117, 23);
             this.button_form_save_pts.TabIndex = 103;
             this.button_form_save_pts.Text = "Save PTS";
             this.button_form_save_pts.UseVisualStyleBackColor = true;
@@ -226,10 +225,10 @@
             // 
             // button_create_ptsfile
             // 
-            this.button_create_ptsfile.Location = new System.Drawing.Point(155, 423);
+            this.button_create_ptsfile.Location = new System.Drawing.Point(153, 481);
             this.button_create_ptsfile.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_create_ptsfile.Name = "button_create_ptsfile";
-            this.button_create_ptsfile.Size = new System.Drawing.Size(116, 53);
+            this.button_create_ptsfile.Size = new System.Drawing.Size(117, 53);
             this.button_create_ptsfile.TabIndex = 104;
             this.button_create_ptsfile.Text = "Create PTS file";
             this.button_create_ptsfile.UseVisualStyleBackColor = true;
@@ -239,41 +238,18 @@
             // 
             this.saveFileDialog_PTS.Filter = "PTSM files(*.xml.PTS)|*.xml.PTS";
             // 
-            // button_ALT_Search
-            // 
-            this.button_ALT_Search.Enabled = false;
-            this.button_ALT_Search.Location = new System.Drawing.Point(155, 240);
-            this.button_ALT_Search.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.button_ALT_Search.Name = "button_ALT_Search";
-            this.button_ALT_Search.Size = new System.Drawing.Size(117, 23);
-            this.button_ALT_Search.TabIndex = 105;
-            this.button_ALT_Search.Text = "ALT Search";
-            this.button_ALT_Search.UseVisualStyleBackColor = true;
-            this.button_ALT_Search.Click += new System.EventHandler(this.button_ALT_Search_Click);
-            // 
-            // button_alt_load
-            // 
-            this.button_alt_load.Location = new System.Drawing.Point(16, 240);
-            this.button_alt_load.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.button_alt_load.Name = "button_alt_load";
-            this.button_alt_load.Size = new System.Drawing.Size(109, 23);
-            this.button_alt_load.TabIndex = 106;
-            this.button_alt_load.Text = "ALT Load";
-            this.button_alt_load.UseVisualStyleBackColor = true;
-            this.button_alt_load.Click += new System.EventHandler(this.button_alt_load_Click);
-            // 
             // backgroundWorker3
             // 
             this.backgroundWorker3.DoWork += new System.ComponentModel.DoWorkEventHandler(this.LoadALTPaths);
-            this.backgroundWorker3.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.LoadALTPathsCompleted);
+            this.backgroundWorker3.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.LoadALTComplete);
             // 
             // PTSSearch
             // 
             this.PTSSearch.Enabled = false;
-            this.PTSSearch.Location = new System.Drawing.Point(155, 528);
+            this.PTSSearch.Location = new System.Drawing.Point(153, 374);
             this.PTSSearch.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.PTSSearch.Name = "PTSSearch";
-            this.PTSSearch.Size = new System.Drawing.Size(116, 50);
+            this.PTSSearch.Size = new System.Drawing.Size(117, 50);
             this.PTSSearch.TabIndex = 107;
             this.PTSSearch.Text = "PTSSearh";
             this.PTSSearch.UseVisualStyleBackColor = true;
@@ -281,10 +257,10 @@
             // 
             // PTSLoad
             // 
-            this.PTSLoad.Location = new System.Drawing.Point(13, 528);
+            this.PTSLoad.Location = new System.Drawing.Point(16, 374);
             this.PTSLoad.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.PTSLoad.Name = "PTSLoad";
-            this.PTSLoad.Size = new System.Drawing.Size(101, 50);
+            this.PTSLoad.Size = new System.Drawing.Size(109, 50);
             this.PTSLoad.TabIndex = 108;
             this.PTSLoad.Text = "PTS Load";
             this.PTSLoad.UseVisualStyleBackColor = true;
@@ -292,7 +268,7 @@
             // 
             // LandmarkFlag
             // 
-            this.LandmarkFlag.Location = new System.Drawing.Point(60, 484);
+            this.LandmarkFlag.Location = new System.Drawing.Point(113, 562);
             this.LandmarkFlag.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.LandmarkFlag.Name = "LandmarkFlag";
             this.LandmarkFlag.Size = new System.Drawing.Size(157, 26);
@@ -303,7 +279,7 @@
             // 
             // Exit
             // 
-            this.Exit.Location = new System.Drawing.Point(37, 597);
+            this.Exit.Location = new System.Drawing.Point(45, 605);
             this.Exit.Name = "Exit";
             this.Exit.Size = new System.Drawing.Size(198, 23);
             this.Exit.TabIndex = 110;
@@ -311,17 +287,26 @@
             this.Exit.UseVisualStyleBackColor = true;
             this.Exit.Click += new System.EventHandler(this.Exit_Click);
             // 
+            // button_pts_cost_set
+            // 
+            this.button_pts_cost_set.Location = new System.Drawing.Point(16, 562);
+            this.button_pts_cost_set.Name = "button_pts_cost_set";
+            this.button_pts_cost_set.Size = new System.Drawing.Size(75, 23);
+            this.button_pts_cost_set.TabIndex = 111;
+            this.button_pts_cost_set.Text = "SetCost";
+            this.button_pts_cost_set.UseVisualStyleBackColor = true;
+            this.button_pts_cost_set.Click += new System.EventHandler(this.button_pts_cost_set_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1311, 641);
+            this.Controls.Add(this.button_pts_cost_set);
             this.Controls.Add(this.Exit);
             this.Controls.Add(this.LandmarkFlag);
             this.Controls.Add(this.PTSLoad);
             this.Controls.Add(this.PTSSearch);
-            this.Controls.Add(this.button_alt_load);
-            this.Controls.Add(this.button_ALT_Search);
             this.Controls.Add(this.button_create_ptsfile);
             this.Controls.Add(this.button_form_save_pts);
             this.Controls.Add(this.button_save_pts);
@@ -367,13 +352,12 @@
         private System.Windows.Forms.Button button_form_save_pts;
         private System.Windows.Forms.Button button_create_ptsfile;
         private System.Windows.Forms.SaveFileDialog saveFileDialog_PTS;
-        private System.Windows.Forms.Button button_ALT_Search;
-        private System.Windows.Forms.Button button_alt_load;
         private System.ComponentModel.BackgroundWorker backgroundWorker3;
         private System.Windows.Forms.Button PTSSearch;
         private System.Windows.Forms.Button PTSLoad;
         private System.Windows.Forms.Button LandmarkFlag;
         private System.Windows.Forms.Button Exit;
+        private System.Windows.Forms.Button button_pts_cost_set;
     }
 }
 

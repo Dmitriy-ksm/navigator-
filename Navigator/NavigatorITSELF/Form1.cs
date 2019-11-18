@@ -12,16 +12,17 @@ using System.IO;
 using NavigationDLL;
 using System.Diagnostics;
 using MapRenderDLL;
-using NavigationDLLver2;
 using System.Globalization;
 
 namespace Navigator
 {
+
     public partial class Form1 : Form
     {
         #region A* 
         //Граф в памяти
-        NavigationDLL.Graf tree;
+        // Now its ALT
+        //NavigationDLL.Graf tree;
         //Колекции точек что принадлежат выбраному пути
         List<long> way, way_2;
         //Колекции с точками что используются в процессе поиска пути
@@ -31,6 +32,23 @@ namespace Navigator
         {
             if (start != 0 && end != 0)
             {
+                if(tree.ALTr)
+                {
+                    map.Drop();
+                    stopwatchSearch.Restart();
+                    bool flag;
+                    List<long> path = tree.GetWay(end, start, out flag);
+                    TimeView(stopwatchSearch);
+                    textBox_info.Text += "ALT: " + flag.ToString();
+                    map.getWay(tree.A, path, map_index, Brushes.Red);
+                    pictureBox_navmap.Image = map.temp_map;
+                    DialogResult res_2 = MessageBox.Show("Start A* search?", "Confirmation", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+                    if (res_2 == DialogResult.Cancel)
+                    {
+                        return;
+                    }
+                    
+                }
                 ButtonOff(button_start_search, button_first_point, button_last_point);
                 ButtonOn(button_stop_search, button_update_status_search);
                 textBox_info.Text = "Начат быстрый поиск пути";
@@ -72,7 +90,7 @@ namespace Navigator
             openFileDialog1.RestoreDirectory = true;
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                stopwatch.Restart();
+                stopwatchLoad.Restart();
                 textBox_info.Text = "Строим граф";
                 file_name = openFileDialog1.FileName;
                 if (backgroundWorker1.IsBusy != true)
@@ -98,13 +116,14 @@ namespace Navigator
                 }
                 ButtonOn(button_load_navdata);
             }
+            ShowALTDialogBox();
         }
         //BackgroundWorker Однопоточный поиск пути 
         private void OneWaySearchBackgroundThread(object sender, DoWorkEventArgs e)
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("ru-UA");
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("ru-UA");
-            tree.Refresh_Search();
+            tree.A.Refresh_Search();
             dist = 0;
             way = new List<long>();
             way_2 = new List<long>();
@@ -114,21 +133,21 @@ namespace Navigator
             Not_Look = new List<SavedData>();
             bonus_thread = new Thread(() =>
             {
-                way = tree.getWay_A(start, end, out dist, ref Not_Look, ref Look);
+                way = tree.A.getWay_A(start, end, out dist, ref Not_Look, ref Look);
             });
-            stopwatch.Restart();
+            stopwatchSearch.Restart();
             bonus_thread.Start();
             while (bonus_thread.IsAlive)
             {
                 if (backgroundWorker2.CancellationPending)
                 {
                     bonus_thread.Abort();
-                    stopwatch.Stop();
+                    stopwatchSearch.Stop();
                     break;
                 }
             }
             //bonus_thread.Join();
-            stopwatch.Stop();
+            stopwatchSearch.Stop();
         }
         //Остановка поиска
         private void StopSearch(object sender, EventArgs e)
@@ -144,27 +163,27 @@ namespace Navigator
         //Обновление на карте результатов поиска 
         private void UpdateSearchStatus(object sender, EventArgs e)
         {
-            stopwatch.Stop();
-            tree.blocker = true;
-            while (!tree.block_suc)
+            stopwatchSearch.Stop();
+            tree.A.blocker = true;
+            while (!tree.A.block_suc)
             {
                 Thread.Sleep(10);
                 break;
             }
-            if (!tree.block_suc)
+            if (!tree.A.block_suc)
             {
                 textBox_info.Text += Environment.NewLine + "Не удалось заблокировать поток,подождите и повторите запрос";
                 return;
             }
             map.Drop();
             if (Look.Count > 0)
-                map.getWay(tree, Look, Not_Look, map_index);
+                map.getWay(tree.A, Look, Not_Look, map_index);
             if (Look_2.Count > 0)
-                map.getWay(tree, Look_2, Not_Look_2, map_index);
+                map.getWay(tree.A, Look_2, Not_Look_2, map_index);
             pictureBox_navmap.Image = map.temp_map;
-            tree.block_suc = false;
-            tree.blocker = false;
-            stopwatch.Start();
+            tree.A.block_suc = false;
+            tree.A.blocker = false;
+            stopwatchSearch.Start();
         }
         //BackgroundWorker двупоточного поиска пути и открытия файла
         private void OpenFileOrTwoWaySearchBackgroubdThread(object sender, DoWorkEventArgs e)
@@ -179,18 +198,18 @@ namespace Navigator
                     {
                         map.Drop();
                         pictureBox_navmap.Image = map.temp_map;
-                        tree.Refresh_Search();
+                        tree.A.Refresh_Search();
                         dist = 0;
                         dist_2 = 0;
                         bonus_thread = new Thread(() =>
                         {
-                            way = tree.getWay_A(start, end, out dist, ref Not_Look, ref Look);
+                            way = tree.A.getWay_A(start, end, out dist, ref Not_Look, ref Look);
                         });
                         bonus_thread_2 = new Thread(() =>
                         {
-                            way_2 = tree.getWay_A(end, start, out dist_2, ref Not_Look_2, ref Look_2, true);
+                            way_2 = tree.A.getWay_A(end, start, out dist_2, ref Not_Look_2, ref Look_2, true);
                         });
-                        stopwatch.Restart();
+                        stopwatchSearch.Restart();
                         bonus_thread.Start();
                         bonus_thread_2.Start();
                         while (bonus_thread.IsAlive)
@@ -201,13 +220,13 @@ namespace Navigator
                                 bonus_thread.Abort();
                                 if (bonus_thread_2.IsAlive)
                                     bonus_thread_2.Abort();
-                                stopwatch.Stop();
+                                stopwatchSearch.Stop();
                                 break;
                             }
                         }
                         //bonus_thread.Join();
                         //bonus_thread_2.Join();
-                        stopwatch.Stop();
+                        stopwatchSearch.Stop();
                         backgroundWorker1.RunWorkerCompleted += new RunWorkerCompletedEventHandler(TwoWaySearchCompleted);
                         break;
                     }
@@ -216,18 +235,18 @@ namespace Navigator
                     {
                         using (StreamReader myStream = new StreamReader(file_name))
                         {
-                            tree = new NavigationDLL.Graf(myStream.ReadLine().Split(' ')[1].Split('"')[1]);
+                            tree.A = new NavigationDLL.Graf(myStream.ReadLine().Split(' ')[1].Split('"')[1]);
                             while (!myStream.EndOfStream)
                             {
                                 string data = myStream.ReadLine().Split(' ')[1].Split('"')[1];
-                                tree.AddNode(new GrafNode(data, '/', ';'));
+                                tree.A.AddNode(new GrafNode(data, '/', ';'));
                             }
                         }
                         double min_lat = double.MaxValue;
                         double min_lon = double.MaxValue;
                         double max_lat = double.MinValue;
                         double max_lon = double.MinValue;
-                        foreach (var item in tree.tree)
+                        foreach (var item in tree.A.tree)
                         {
                             if (min_lat > item.Value.parametrs.coords.latitude)
                                 min_lat = item.Value.parametrs.coords.latitude;
@@ -245,8 +264,8 @@ namespace Navigator
                         //stopwatch.Start();
                         map = new NavMap(pictureBox_navmap.Width, pictureBox_navmap.Height, l_u, r_d);
                         map_index = 0;
-                        map.SetAllPoint(tree, map_index);
-                        map.getLine(tree, map_index);
+                        map.SetAllPoint(tree.A, map_index);
+                        map.getLine(tree.A, map_index);
                         map.setBackColor(map_index, Color.Olive);
                         map.Save();
                         backgroundWorker1.RunWorkerCompleted += new RunWorkerCompletedEventHandler(FileOpenCompleted);
@@ -258,11 +277,11 @@ namespace Navigator
         private void OneWaySearchCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             map.Drop();
-            TimeView();
+            TimeView(stopwatchSearch);
             if (Look.Count > 0)
-                map.getWay(tree, Look, Not_Look, map_index);
+                map.getWay(tree.A, Look, Not_Look, map_index);
             if (way.Count > 1)
-                map.getWay(tree, way, map_index, Brushes.Red);
+                map.getWay(tree.A, way, map_index, Brushes.Red);
             pictureBox_navmap.Image = map.temp_map;
             //textBox3.Text = dist + " m";
             ButtonOn(button_start_search, button_first_point, button_last_point);
@@ -273,23 +292,23 @@ namespace Navigator
         {
             double some_dist = dist + dist_2;
             if (Look.Count > 0)
-                map.getWay(tree, Look, Not_Look, map_index);
+                map.getWay(tree.A, Look, Not_Look, map_index);
             if (Look_2.Count > 0)
-                map.getWay(tree, Look_2, Not_Look_2, map_index);
+                map.getWay(tree.A, Look_2, Not_Look_2, map_index);
             if (way.Count > 1)
-                map.getWay(tree, way, map_index, Brushes.Red);
+                map.getWay(tree.A, way, map_index, Brushes.Red);
             if (way_2.Count > 1)
-                map.getWay(tree, way_2, map_index, Brushes.Red);
+                map.getWay(tree.A, way_2, map_index, Brushes.Red);
             pictureBox_navmap.Image = map.temp_map;
             //textBox3.Text = dist + dist_2 + " m";
-            TimeView();
+            TimeView(stopwatchSearch);
+            ShowOneWaySearchADialogBox();
             backgroundWorker1.RunWorkerCompleted -= TwoWaySearchCompleted;
-            ShowMyDialogBox();
         }
         //Отображение загруженной карты
         private void FileOpenCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            TimeView();
+            TimeView(stopwatchLoad);
             pictureBox_navmap.Image = map.temp_map;
             textBox_info.Text += "Кол-во карт " + map.left_up.Length + Environment.NewLine;
             textBox_info.Text += "Левый верхний угол" + map.left_up[0].latitude.ToString() + map.left_up[0].longitude.ToString() + Environment.NewLine;
@@ -306,7 +325,7 @@ namespace Navigator
             backgroundWorker1.RunWorkerCompleted -= FileOpenCompleted;
         }
         //Однопоточный поиск пути
-        public void ShowMyDialogBox()
+        public void ShowOneWaySearchADialogBox()
         {
             DialogResult res_2 = MessageBox.Show("Start slow search?", "Confirmation", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
             if (res_2 == DialogResult.OK)
@@ -324,63 +343,52 @@ namespace Navigator
         #endregion
         #region ALT
         //ALT
-        ALT.ALT testClass = new ALT.ALT();
         //Загрузка маяков и данных препроцессинга
-        private void button_alt_load_Click(object sender, EventArgs e)
+        public void ShowALTDialogBox()
         {
-            OpenFileDialog openFileDialog1 = new OpenFileDialog();
-            openFileDialog1.InitialDirectory = Environment.CurrentDirectory;
-            openFileDialog1.Filter = "ALT data (*.txt)|*.txt";
-            openFileDialog1.FilterIndex = 2;
-            openFileDialog1.RestoreDirectory = true;
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            DialogResult res_2 = MessageBox.Show("Load ALT data?", "Confirmation", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+            if (res_2 == DialogResult.OK)
             {
-                ButtonOff(button_ALT_Search);
-                testClass.CopyGraf(tree);
-                // ways = new Dictionary<long, List<long>>();
-                file_name = openFileDialog1.FileName;
-                testClass.LoadLandmarks(file_name);
-                //testClass.LoadALTData(file_name);
+                Thread.CurrentThread.CurrentCulture = new CultureInfo("ru-UA");
+                Thread.CurrentThread.CurrentUICulture = new CultureInfo("ru-UA");
+                OpenFileDialog openFileDialog1 = new OpenFileDialog();
+                openFileDialog1.InitialDirectory = Environment.CurrentDirectory;
+                openFileDialog1.Filter = "ALT data (*.txt)|*.txt";
+                openFileDialog1.FilterIndex = 2;
+                openFileDialog1.RestoreDirectory = true;
+                if (openFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    //tree..CopyGraf(tree);
+                    // ways = new Dictionary<long, List<long>>();
+                    file_name = openFileDialog1.FileName;
+                    tree.LoadLandmarks(file_name);
+                    //testClass.LoadALTData(file_name);
+                }
+                FolderBrowserDialog FBD = new FolderBrowserDialog();
+                FBD.RootFolder = Environment.SpecialFolder.Desktop;
+                if (FBD.ShowDialog() == DialogResult.OK)
+                {
+                    string dir = FBD.SelectedPath;
+                    backgroundWorker3.RunWorkerAsync(dir);
+                }
             }
-            FolderBrowserDialog FBD = new FolderBrowserDialog();
-            FBD.RootFolder = Environment.SpecialFolder.Desktop;
-            if (FBD.ShowDialog() == DialogResult.OK)
-                backgroundWorker3.RunWorkerAsync(FBD.SelectedPath);
         }
-        //Построение пути по данным препроцессинга
-        private void button_ALT_Search_Click(object sender, EventArgs e)
-        {
-            map.Drop();
-            stopwatch.Restart();
-            bool flag;
-            List<long> path = testClass.GetWay(end, start, out flag);
-            TimeView();
-            textBox_info.Text += "ALT: " + flag.ToString();
-            map.getWay(tree, path, map_index, Brushes.Red);
-            pictureBox_navmap.Image = map.temp_map;
-            /* if(ways.ContainsKey(end))
-             {
-                 map.Drop();
-                 map.getWay(tree, ways[end], map_index, Brushes.Red);
-                 pictureBox_navmap.Image = map.temp_map;
-             }*/
-        }
+        ALT.ALT tree = new ALT.ALT();
         //Загрузка путей после препроцессинга 
         private void LoadALTPaths(object sender, DoWorkEventArgs e)
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("ru-UA");
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("ru-UA");
             string dir = (string)e.Argument;
-            stopwatch.Restart();
+            stopwatchLoad.Restart();
             foreach (string file in Directory.EnumerateFiles(dir, "*.txt"))
             {
-                testClass.LoadALTData(file);
-            }    
+                tree.LoadALTData(file);
+            }
         }
-        private void LoadALTPathsCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void LoadALTComplete(object sender, RunWorkerCompletedEventArgs e)
         {
-            TimeView();
-            ButtonOn(button_ALT_Search);
+            TimeView(stopwatchLoad);
         }
         #endregion
         #region Map
@@ -395,7 +403,7 @@ namespace Navigator
         public void ShowMyDialogBox(NavigationDLL.Coords l_u, NavigationDLL.Coords r_d)
         {
             DialogResult res = MessageBox.Show("Map on one panel?", "Confirmation", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
-            stopwatch.Start();
+            stopwatchLoad.Start();
             if (res == DialogResult.OK)
                 map = new NavMap(pictureBox_navmap.Width, pictureBox_navmap.Height, l_u, r_d);
             if (res == DialogResult.Cancel)
@@ -443,37 +451,37 @@ namespace Navigator
         //Переход на предыдущий кусок карты
         private void PrevMap(object sender, EventArgs e)
         {
-            stopwatch.Restart();
+            stopwatchLoad.Restart();
             if (map_index > 0)
             {
                 map.FullClear();
                 map_index--;
                 map.points_on_map = new Dictionary<Point, List<long>>();
-                map.SetAllPoint(tree, map_index);
-                map.getLine(tree, map_index);
+                map.SetAllPoint(tree.A, map_index);
+                map.getLine(tree.A, map_index);
                 map.setBackColor(map_index, Color.Olive);
                 map.Save();
             }
             pictureBox_navmap.Image = map.temp_map;
-            TimeView();
+            TimeView(stopwatchLoad);
             textBox_info.Text += "Кол-во карт " + map.left_up.Length;
         }
         //Переход на следующий кусок карты
         private void NextMap(object sender, EventArgs e)
         {
-            stopwatch.Restart();
+            stopwatchLoad.Restart();
             if (map_index < map.left_up.Length - 1)
             {
                 map.FullClear();
                 map_index++;
                 map.points_on_map = new Dictionary<Point, List<long>>();
-                map.SetAllPoint(tree, map_index);
-                map.getLine(tree, map_index);
+                map.SetAllPoint(tree.A, map_index);
+                map.getLine(tree.A, map_index);
                 map.setBackColor(map_index, Color.Olive);
                 map.Save();
             }
             pictureBox_navmap.Image = map.temp_map;
-            TimeView();
+            TimeView(stopwatchLoad);
             textBox_info.Text += "Кол-во карт " + map.left_up.Length;
         }
         //Выбор точки начала пути
@@ -519,9 +527,9 @@ namespace Navigator
             map.Drop();
             double min = double.MaxValue;
             long closestLandmark = -1;
-            foreach (var landmarks in testClass.Landmarks.Keys)
+            foreach (var landmarks in tree.Landmarks.Keys)
             {
-                double dist_h = tree[start].calculationCost(tree[landmarks].parametrs);
+                double dist_h = tree.A[start].calculationCost(tree.A[landmarks].parametrs);
                 if (dist_h < min)
                 {
                     closestLandmark = landmarks;
@@ -529,12 +537,13 @@ namespace Navigator
                 }
             }
             bool altused;
-            List<long> path_1 = testClass.GetWay(closestLandmark, start, out altused);
+            tree.A.Refresh_Search();
+            List<long> path_1 = tree.GetWay(closestLandmark, start, out altused);
             min = double.MaxValue;
             closestLandmark = -1;
-            foreach (var landmarks in testClass.Landmarks.Keys)
+            foreach (var landmarks in tree.Landmarks.Keys)
             {
-                double dist_h = tree[end].calculationCost(tree[landmarks].parametrs);
+                double dist_h = tree.A[end].calculationCost(tree.A[landmarks].parametrs);
                 if (dist_h < min)
                 {
                     closestLandmark = landmarks;
@@ -542,12 +551,59 @@ namespace Navigator
                 }
             }
             bool altused_2;
-            List<long> path_2 = testClass.GetWay(closestLandmark, end, out altused_2);
-            map.getWay(tree, path_1, map_index, Brushes.Red);
-            map.getWay(tree, path_2, map_index, Brushes.Red);
+            tree.A.Refresh_Search();
+            List<long> path_2 = tree.GetWay(closestLandmark, end, out altused_2);
+            map.getWay(tree.A, path_1, map_index, Brushes.Red);
+            map.getWay(tree.A, path_2, map_index, Brushes.Red);
             //Выбор транспорта
-            //Не сделаль
-            //КАКАЯТОФУНКЦИЯ(path_1[0],path_2[0]);
+            double[] tps_costs = new double[] { 7.0f, 8.5f, 4.0f, 2.5f };
+            for (int i = 0; i < 4; i++)
+                if (costs[i] != 0)
+                    tps_costs[i] = costs[i];
+            double max_cost = tps_costs.Sum()+1;
+            foreach(var list_path in path.Values)
+            {
+                foreach(var single_path in list_path)
+                {
+                    if (single_path.transport_id_dest == 200)
+                        single_path.transport_cost_dest = tps_costs[0];
+                    if (single_path.transport_id_dest == 210)
+                        single_path.transport_cost_dest = tps_costs[1];
+                    if (single_path.transport_id_dest == 300)
+                        single_path.transport_cost_dest = tps_costs[2];
+                    if (single_path.transport_id_dest == 310)
+                        single_path.transport_cost_dest = tps_costs[3];
+                }
+            }
+            double total_cost;
+            double total_time;
+            Dictionary<long,long> way_trans;
+            List<long> way_publicstop = PublicTransportPath.GetPath(path, path_1[path_1.Count-1], path_2[path_2.Count - 1], max_cost,out way_trans, out total_cost, out total_time, 0);
+            double t = total_cost;
+            /*
+            List<long> temp = new List<long>();
+            int color_index = -1;
+            Brush[] colors = new Brush[] {  Brushes.Red, Brushes.Green, Brushes.Blue, Brushes.Red };
+            foreach(var indexes in way_publicstop)
+            {
+                if (way_trans.ContainsValue(indexes))
+                {
+                    if(temp.Count>0)
+                        map.getWay(tree.A, temp, 0, colors[color_index]);
+                    color_index++;
+                    temp = new List<long>();
+                }
+                temp.Add(indexes);
+            }
+            */
+            map.getWay(tree.A, way_publicstop, 0, Brushes.Red);
+            textBox_info.Text = "Travel cost:" + total_cost + " / Travel time:" + total_time;
+            //foreach(var item in way_trans)
+            //    textBox_info.Text += Environment.NewLine + "SID:" + item.Value + " TID:" + item.Key;
+            pictureBox_navmap.Image = map.temp_map;
+            foreach(var itemlist in path)
+                foreach (var item in itemlist.Value)
+                    item.Reset();
         }
         //Загрузка остановок
         private void PTSLoad_Click(object sender, EventArgs e)
@@ -574,18 +630,21 @@ namespace Navigator
                                 PTS[transport_number].Add(new PublicTransport(data));
                             }
                         //тест
-                        Color[] colors = new Color[PTS.Keys.Count];
-                        int size = 12;
-                        for (int i=0;i<colors.Length;i++)
-                        {
-                            colors[i] = Color.FromArgb(255, new Random().Next(0, 255),
-                                new Random().Next(0, 255), new Random().Next(0, 255));
-                            size--;
-                            List<long> points = new List<long>();
-                            foreach (var pts in PTS[PTS.Keys.ToArray()[i]])
-                                points.Add(pts.point_id);
-                            map.FlagThePoint(colors[i], size, points.ToArray());
-                            pictureBox_navmap.Image = map.temp_map;
+                        if(pictureBox_navmap.Image != null)
+                        { 
+                            Color[] colors = new Color[PTS.Keys.Count];
+                            int size = 12;
+                            for (int i=0;i<colors.Length;i++)
+                            {
+                                colors[i] = Color.FromArgb(255, new Random().Next(0, 255),
+                                    new Random().Next(0, 255), new Random().Next(0, 255));
+                                size--;
+                                List<long> points = new List<long>();
+                                foreach (var pts in PTS[PTS.Keys.ToArray()[i]])
+                                    points.Add(pts.point_id);
+                                map.FlagThePoint(colors[i], size, points.ToArray());
+                                pictureBox_navmap.Image = map.temp_map;
+                            }
                         }
                         //тест окончен
                         foreach (var pts_transp in PTS)
@@ -607,10 +666,21 @@ namespace Navigator
                                     path[id].CopyTo(temp);
                                     foreach (var item in temp)
                                     {
-                                        path[id].Add(new PublicTransportPath(item.parent_tp, pts[i]));
+                                        if(pts[i].point_id == item.parent_tp)
+                                        {
+                                            PublicTransportPath temp_path = new PublicTransportPath(item.parent_tp, pts[i], item.transport_id_sour);
+                                            if(!path[id].Contains(temp_path))
+                                                path[id].Add(temp_path);
+                                            PublicTransportPath temp_path_2 = new PublicTransportPath(pts[i], item.parent_tp, item.transport_id_sour);
+                                            if (!path[id].Contains(temp_path_2))
+                                                 path[id].Add(temp_path_2);
+                                        }
                                     }
                                 }
                                 path[id].Add(new PublicTransportPath(pts[i], pts[i + 1]));
+                                if(i>0)
+                                    path[id].Add(new PublicTransportPath(pts[i], pts[i - 1]));
+                                //path[id].Add(new PublicTransportPath(pts[i + 1], pts[i]));
                             }
                             long id_ = pts[pts.Length - 1].point_id;
                             if (!path.ContainsKey(id_))
@@ -639,10 +709,26 @@ namespace Navigator
         //Потоки для BackgroundWorkera
         Thread bonus_thread, bonus_thread_2;
         //Счетчик для оценки производительности
-        Stopwatch stopwatch;
+        Stopwatch stopwatchLoad,stopwatchSearch;
         //Растоянния между точкой начала и конца
         double dist, dist_2;
-        
+        //Цены на проезд
+        double[] costs; 
+        private void button_pts_cost_set_Click(object sender, EventArgs e)
+        {
+            TransportCost form = new TransportCost();
+            form.Owner = this;
+            form.FormClosed += (object s, FormClosedEventArgs args) =>
+            {
+                string[] results = form.getData().Split(new char[] { '/' },StringSplitOptions.RemoveEmptyEntries);
+                for(int i=0;i< results.Length; i++)
+                {
+                    costs[i] = Convert.ToDouble(results[i]);
+                }
+            };
+            form.Show();
+        }
+
         private void Exit_Click(object sender, EventArgs e)
         {
             Application.Exit();
@@ -665,7 +751,7 @@ namespace Navigator
             foreach (var button in buttons)
                 button.Enabled = true;
         }
-        private void TimeView()
+        private void TimeView(Stopwatch stopwatch)
         {
             stopwatch.Stop();
             TimeSpan ts = stopwatch.Elapsed;
@@ -676,13 +762,14 @@ namespace Navigator
         {
 
             CultureInfo culture = new CultureInfo("ru-UA");
-
             InitializeComponent();
             //pictureBox_navmap.PreferredSize = new Size(0, 0);
             //pictureBox_navmap.Enabled = true;
             //pictureBox_navmap.Enabled = false;
             path = new Dictionary<long, List<PublicTransportPath>>();
-            stopwatch = new Stopwatch();
+            stopwatchSearch = new Stopwatch();
+            stopwatchLoad = new Stopwatch();
+            costs = new double[4] { 0, 0, 0, 0 };
         }
         private void StopSelectTextBoxes(object sender, MouseEventArgs e)
         {
@@ -691,7 +778,7 @@ namespace Navigator
 
         private void SearchLandmark()
         {
-            map.FlagThePoint(Color.Blue,5,testClass.Landmarks.Keys.ToArray());
+            map.FlagThePoint(Color.Blue,5,tree.Landmarks.Keys.ToArray());
             pictureBox_navmap.Image = map.temp_map;
         }
     }
