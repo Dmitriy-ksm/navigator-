@@ -43,12 +43,10 @@ namespace Navigator
         public static PublicTransportPath next_Point(List<PublicTransportPath> Not_Look, int mode)
         {
             PublicTransportPath temp_path = null;
-            //PublicTransportPath PTS_path = null;
             double min = double.MaxValue;
             foreach (var path in Not_Look)
             {
                 double check_value = PublicTransportPath.Mode(path, mode);
-                //min = double.MaxValue;
                 if (min > check_value)
                 {
                     temp_path = new PublicTransportPath(path);
@@ -69,7 +67,7 @@ namespace Navigator
         /// <param name="timetravel">Общее время проезда</param>
         /// <param name="mode">Режим работы(0-по цене,1-по времени,2-по евристике)</param>
         /// <returns>Колекция с номерами остановок</returns>
-        public static List<long> GetPath(Dictionary<long, List<PublicTransportPath>> PTS,long start,long end, double max_cost, out Dictionary<long,long> trans_id, out double real_cost, out double timetravel, int mode=0)
+        public static List<long> GetPath(Dictionary<long, List<PublicTransportPath>> PTS, long start, long end, double max_cost, out Dictionary<long,long> trans_id, out double real_cost, out double timetravel, int mode=0)
         {
             long index = start;
             List<PublicTransportPath> Not_Look = new List<PublicTransportPath>();
@@ -85,9 +83,6 @@ namespace Navigator
             PublicTransportPath temp_path = PublicTransportPath.next_Point(Not_Look, mode);
             Look.Add(temp_path);
             Not_Look.Remove(temp_path);
-            //double time = temp_path.time_for_travel;
-            //double cost = temp_path.transport_cost_dest;
-            //List<PublicTransportPath> test = new List<PublicTransportPath>();
             while(temp_path.dest_tp!=end)
             {
                 List<PublicTransportPath> collection = PTS[temp_path.dest_tp];
@@ -111,8 +106,6 @@ namespace Navigator
                     }
                 }
                 temp_path = PublicTransportPath.next_Point(Not_Look, mode);
-                //if (temp_path.transport_id_dest == 310)
-                //    test.Add(temp_path);
                 Look.Add(temp_path);
                 Not_Look.Remove(temp_path);
             }
@@ -129,8 +122,8 @@ namespace Navigator
                 foreach(var path in Look)
                 {
                     double check_value = PublicTransportPath.Mode(path, mode);
-                    if (path.dest_tp==way.Last()&&
-                        min>check_value)
+                    if (!way.Contains(path.parent_tp) &&
+                        path.dest_tp == way.Last() && min > check_value)
                     {
                         min = check_value;
                         temp_ind = path.parent_tp;
@@ -225,7 +218,7 @@ namespace Navigator
             transport_cost_dest = cost_r;
             koef_transfer = (cost_r / max_cost);
             time_for_travel += time;
-            heuristic = time_for_travel * koef_transfer * koef;
+            heuristic = ( time_for_travel * 0.8 ) * koef_transfer * koef;
             return cost_r;
         }
         public double SetHeuristic(double max_cost,long start_index)
@@ -248,9 +241,5 @@ namespace Navigator
             time_for_travel = 5;
             koef_transfer = 1;
         }
-        /*public double GetHeuristic()
-        {
-            return heuristic;
-        }*/
     }
 }

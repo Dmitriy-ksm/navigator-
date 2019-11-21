@@ -54,6 +54,9 @@
             this.LandmarkFlag = new System.Windows.Forms.Button();
             this.Exit = new System.Windows.Forms.Button();
             this.button_pts_cost_set = new System.Windows.Forms.Button();
+            this.checkBox_mode0 = new System.Windows.Forms.CheckBox();
+            this.checkBox_mode1 = new System.Windows.Forms.CheckBox();
+            this.checkBox_mode2 = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_navmap)).BeginInit();
             this.SuspendLayout();
             // 
@@ -192,7 +195,7 @@
             // 
             // button_pts_add
             // 
-            this.button_pts_add.Location = new System.Drawing.Point(16, 445);
+            this.button_pts_add.Location = new System.Drawing.Point(16, 477);
             this.button_pts_add.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_pts_add.Name = "button_pts_add";
             this.button_pts_add.Size = new System.Drawing.Size(109, 23);
@@ -203,7 +206,7 @@
             // 
             // button_save_pts
             // 
-            this.button_save_pts.Location = new System.Drawing.Point(16, 481);
+            this.button_save_pts.Location = new System.Drawing.Point(16, 504);
             this.button_save_pts.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_save_pts.Name = "button_save_pts";
             this.button_save_pts.Size = new System.Drawing.Size(109, 53);
@@ -214,7 +217,7 @@
             // 
             // button_form_save_pts
             // 
-            this.button_form_save_pts.Location = new System.Drawing.Point(153, 445);
+            this.button_form_save_pts.Location = new System.Drawing.Point(153, 477);
             this.button_form_save_pts.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_form_save_pts.Name = "button_form_save_pts";
             this.button_form_save_pts.Size = new System.Drawing.Size(117, 23);
@@ -225,7 +228,7 @@
             // 
             // button_create_ptsfile
             // 
-            this.button_create_ptsfile.Location = new System.Drawing.Point(153, 481);
+            this.button_create_ptsfile.Location = new System.Drawing.Point(153, 504);
             this.button_create_ptsfile.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_create_ptsfile.Name = "button_create_ptsfile";
             this.button_create_ptsfile.Size = new System.Drawing.Size(117, 53);
@@ -297,11 +300,49 @@
             this.button_pts_cost_set.UseVisualStyleBackColor = true;
             this.button_pts_cost_set.Click += new System.EventHandler(this.button_pts_cost_set_Click);
             // 
+            // checkBox_mode0
+            // 
+            this.checkBox_mode0.AutoSize = true;
+            this.checkBox_mode0.Checked = true;
+            this.checkBox_mode0.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_mode0.Location = new System.Drawing.Point(93, 429);
+            this.checkBox_mode0.Name = "checkBox_mode0";
+            this.checkBox_mode0.Size = new System.Drawing.Size(79, 21);
+            this.checkBox_mode0.TabIndex = 112;
+            this.checkBox_mode0.Text = "I режим";
+            this.checkBox_mode0.UseVisualStyleBackColor = true;
+            this.checkBox_mode0.CheckedChanged += new System.EventHandler(this.checkBox_mode0_CheckedChanged);
+            // 
+            // checkBox_mode1
+            // 
+            this.checkBox_mode1.AutoSize = true;
+            this.checkBox_mode1.Location = new System.Drawing.Point(27, 451);
+            this.checkBox_mode1.Name = "checkBox_mode1";
+            this.checkBox_mode1.Size = new System.Drawing.Size(82, 21);
+            this.checkBox_mode1.TabIndex = 113;
+            this.checkBox_mode1.Text = "II режим";
+            this.checkBox_mode1.UseVisualStyleBackColor = true;
+            this.checkBox_mode1.CheckedChanged += new System.EventHandler(this.checkBox_mode1_CheckedChanged);
+            // 
+            // checkBox_mode2
+            // 
+            this.checkBox_mode2.AutoSize = true;
+            this.checkBox_mode2.Location = new System.Drawing.Point(153, 451);
+            this.checkBox_mode2.Name = "checkBox_mode2";
+            this.checkBox_mode2.Size = new System.Drawing.Size(85, 21);
+            this.checkBox_mode2.TabIndex = 114;
+            this.checkBox_mode2.Text = "III режим";
+            this.checkBox_mode2.UseVisualStyleBackColor = true;
+            this.checkBox_mode2.CheckedChanged += new System.EventHandler(this.checkBox_mode2_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1311, 641);
+            this.Controls.Add(this.checkBox_mode2);
+            this.Controls.Add(this.checkBox_mode1);
+            this.Controls.Add(this.checkBox_mode0);
             this.Controls.Add(this.button_pts_cost_set);
             this.Controls.Add(this.Exit);
             this.Controls.Add(this.LandmarkFlag);
@@ -358,6 +399,9 @@
         private System.Windows.Forms.Button LandmarkFlag;
         private System.Windows.Forms.Button Exit;
         private System.Windows.Forms.Button button_pts_cost_set;
+        private System.Windows.Forms.CheckBox checkBox_mode0;
+        private System.Windows.Forms.CheckBox checkBox_mode1;
+        private System.Windows.Forms.CheckBox checkBox_mode2;
     }
 }
 

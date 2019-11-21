@@ -16,13 +16,9 @@ using System.Globalization;
 
 namespace Navigator
 {
-
     public partial class Form1 : Form
     {
         #region A* 
-        //Граф в памяти
-        // Now its ALT
-        //NavigationDLL.Graf tree;
         //Колекции точек что принадлежат выбраному пути
         List<long> way, way_2;
         //Колекции с точками что используются в процессе поиска пути
@@ -578,28 +574,15 @@ namespace Navigator
             double total_cost;
             double total_time;
             Dictionary<long,long> way_trans;
-            List<long> way_publicstop = PublicTransportPath.GetPath(path, path_1[path_1.Count-1], path_2[path_2.Count - 1], max_cost,out way_trans, out total_cost, out total_time, 0);
+            int mode = 0;
+            if (checkBox_mode1.Checked)
+                mode = 1;
+            if (checkBox_mode2.Checked)
+                mode = 2;
+            List<long> way_publicstop = PublicTransportPath.GetPath(path, path_1[path_1.Count-1], path_2[path_2.Count - 1], max_cost,out way_trans, out total_cost, out total_time, mode);
             double t = total_cost;
-            /*
-            List<long> temp = new List<long>();
-            int color_index = -1;
-            Brush[] colors = new Brush[] {  Brushes.Red, Brushes.Green, Brushes.Blue, Brushes.Red };
-            foreach(var indexes in way_publicstop)
-            {
-                if (way_trans.ContainsValue(indexes))
-                {
-                    if(temp.Count>0)
-                        map.getWay(tree.A, temp, 0, colors[color_index]);
-                    color_index++;
-                    temp = new List<long>();
-                }
-                temp.Add(indexes);
-            }
-            */
             map.getWay(tree.A, way_publicstop, 0, Brushes.Red);
             textBox_info.Text = "Travel cost:" + total_cost + " / Travel time:" + total_time;
-            //foreach(var item in way_trans)
-            //    textBox_info.Text += Environment.NewLine + "SID:" + item.Value + " TID:" + item.Key;
             pictureBox_navmap.Image = map.temp_map;
             foreach(var itemlist in path)
                 foreach (var item in itemlist.Value)
@@ -680,7 +663,6 @@ namespace Navigator
                                 path[id].Add(new PublicTransportPath(pts[i], pts[i + 1]));
                                 if(i>0)
                                     path[id].Add(new PublicTransportPath(pts[i], pts[i - 1]));
-                                //path[id].Add(new PublicTransportPath(pts[i + 1], pts[i]));
                             }
                             long id_ = pts[pts.Length - 1].point_id;
                             if (!path.ContainsKey(id_))
@@ -713,7 +695,44 @@ namespace Navigator
         //Растоянния между точкой начала и конца
         double dist, dist_2;
         //Цены на проезд
-        double[] costs; 
+        double[] costs;
+
+        private void checkBox_mode2_CheckedChanged(object sender, EventArgs e)
+        {
+            if(checkBox_mode2.Checked == true)
+            { 
+                checkBox_mode0.Checked = false;
+                checkBox_mode1.Checked = false;
+            }
+            if (!checkBox_mode0.Checked
+                && !checkBox_mode1.Checked && !checkBox_mode2.Checked)
+                checkBox_mode0.Checked = true;
+        }
+
+        private void checkBox_mode1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox_mode1.Checked == true)
+            {
+                checkBox_mode0.Checked = false;
+                checkBox_mode2.Checked = false;
+            }
+            if (!checkBox_mode0.Checked
+                && !checkBox_mode1.Checked && !checkBox_mode2.Checked)
+                checkBox_mode0.Checked = true;
+        }
+
+        private void checkBox_mode0_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox_mode0.Checked )
+            {
+                checkBox_mode2.Checked = false;
+                checkBox_mode1.Checked = false;
+            }
+            if(!checkBox_mode0.Checked 
+                && !checkBox_mode1.Checked && !checkBox_mode2.Checked)
+                checkBox_mode0.Checked = true;
+        }
+
         private void button_pts_cost_set_Click(object sender, EventArgs e)
         {
             TransportCost form = new TransportCost();
@@ -763,9 +782,6 @@ namespace Navigator
 
             CultureInfo culture = new CultureInfo("ru-UA");
             InitializeComponent();
-            //pictureBox_navmap.PreferredSize = new Size(0, 0);
-            //pictureBox_navmap.Enabled = true;
-            //pictureBox_navmap.Enabled = false;
             path = new Dictionary<long, List<PublicTransportPath>>();
             stopwatchSearch = new Stopwatch();
             stopwatchLoad = new Stopwatch();
