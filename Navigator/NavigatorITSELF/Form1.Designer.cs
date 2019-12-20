@@ -362,9 +362,7 @@
             this.Controls.Add(this.button_load_navdata);
             this.Controls.Add(this.textBox_info);
             this.Controls.Add(this.button_start_search);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Margin = new System.Windows.Forms.Padding(4);
-            this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "Navigator";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_navmap)).EndInit();

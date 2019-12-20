@@ -579,6 +579,10 @@ namespace Navigator
                 mode = 1;
             if (checkBox_mode2.Checked)
                 mode = 2;
+            if (altused)
+                path_1.Reverse();
+            if (altused_2)
+                path_2.Reverse();
             List<long> way_publicstop = PublicTransportPath.GetPath(path, path_1[path_1.Count-1], path_2[path_2.Count - 1], max_cost,out way_trans, out total_cost, out total_time, mode);
             double t = total_cost;
             map.getWay(tree.A, way_publicstop, 0, Brushes.Red);
